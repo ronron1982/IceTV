@@ -1,6 +1,6 @@
 services:
   icetv:
-    image: ghcr.io/ronron1982/icetv:portainer-test-a9b2b24
+    image: ghcr.io/ronron1982/icetv:portainer-test
     container_name: icetv-portainer-test
     restart: unless-stopped
     ports:
