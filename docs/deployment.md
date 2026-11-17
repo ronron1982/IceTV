@@ -49,7 +49,7 @@ docker compose up -d
 3. 部署前修改文件中的 `ICETV_PASSWORD`、`AUTH_SECRET` 与 `CRON_SECRET`。
 4. 点击 **Deploy the stack**；首次部署会根据仓库中的 `Dockerfile` 自动构建镜像。
 
-该文件使用独立的 `icetv-portainer-test-data` 数据卷，默认通过 NAS 的 `3000` 端口访问。若端口已被占用，请将映射改为其他主机端口，例如 `3010:3000`。
+该文件使用独立的 `icetv-portainer-test-data` 数据卷，默认通过 NAS 的 `37815` 端口访问。若端口已被占用，请将映射改为其他主机端口，例如 `3010:3000`。
 
 ## Docker + MySQL
 

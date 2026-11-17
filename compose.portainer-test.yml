@@ -7,7 +7,7 @@ services:
     container_name: icetv-portainer-test
     restart: unless-stopped
     ports:
-      - '3000:3000'
+      - '37815:3000'
     environment:
       ICETV_USERNAME: admin
       ICETV_PASSWORD: change_this_password
