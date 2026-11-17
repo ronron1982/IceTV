@@ -1,9 +1,6 @@
 services:
   icetv:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: icetv-portainer-test:traditional
+    image: ghcr.io/ronron1982/icetv:portainer-test
     container_name: icetv-portainer-test
     restart: unless-stopped
     ports:
