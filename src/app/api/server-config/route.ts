@@ -48,6 +48,7 @@ export async function GET(request: NextRequest) {
     EnableUserDanmaku: publicConfig.EnableUserDanmaku,
     CustomCategories: publicConfig.CustomCategories,
     FluidSearch: publicConfig.FluidSearch,
+    TraditionalChinese: publicConfig.TraditionalChinese,
     VodPageTimeoutSeconds: publicConfig.VodPageTimeoutSeconds,
     VodFragmentTimeoutSeconds: publicConfig.VodFragmentTimeoutSeconds,
     PlaybackHistoryPageSize: publicConfig.PlaybackHistoryPageSize,

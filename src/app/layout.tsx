@@ -104,6 +104,7 @@ export default async function RootLayout({
     ENABLE_USER_DANMAKU: publicConfig.EnableUserDanmaku,
     CUSTOM_CATEGORIES: publicConfig.CustomCategories,
     FLUID_SEARCH: publicConfig.FluidSearch,
+    TRADITIONAL_CHINESE: publicConfig.TraditionalChinese,
     VOD_PAGE_TIMEOUT_SECONDS: publicConfig.VodPageTimeoutSeconds,
     VOD_FRAGMENT_TIMEOUT_SECONDS: publicConfig.VodFragmentTimeoutSeconds,
     PLAYBACK_HISTORY_PAGE_SIZE: publicConfig.PlaybackHistoryPageSize,

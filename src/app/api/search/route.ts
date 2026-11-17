@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { isGuardFailure, requireActiveUser } from '@/lib/api-auth';
 import { getSearchSourceConcurrency } from '@/lib/cache-budget-profile';
+import { getSearchQueryVariants, toSimplified } from '@/lib/chinese';
 import { getAvailableApiSites, getConfigForRead } from '@/lib/config';
 import { normalizeRuntimeParams } from '@/lib/runtime-params';
 import { collectSearchAggregation } from '@/lib/search-aggregate';
@@ -22,14 +23,16 @@ export async function GET(request: NextRequest) {
   if (isGuardFailure(guardResult)) return guardResult.response;
 
   const { searchParams } = new URL(request.url);
-  const query = searchParams.get('q');
+  const rawQuery = searchParams.get('q');
 
-  if (!query) {
+  if (!rawQuery) {
     return NextResponse.json(
       { results: [] },
       { headers: { 'Cache-Control': 'private, no-store' } },
     );
   }
+  const query = toSimplified(rawQuery);
+  const queryVariants = getSearchQueryVariants(rawQuery);
 
   const config = await getConfigForRead();
   const runtimeParams = normalizeRuntimeParams(config.SiteConfig);
@@ -49,6 +52,7 @@ export async function GET(request: NextRequest) {
   );
   const aggregateCacheParams = {
     query,
+    queryVariants,
     apiSites,
     maxSearchPages,
     disableYellowFilter: config.SiteConfig.DisableYellowFilter,
@@ -61,6 +65,7 @@ export async function GET(request: NextRequest) {
         collectSearchAggregation({
           apiSites,
           query,
+          queryVariants,
           maxSearchPages,
           disableYellowFilter: config.SiteConfig.DisableYellowFilter,
           sourceConcurrency,
@@ -93,6 +98,7 @@ export async function GET(request: NextRequest) {
         collectSearchAggregation({
           apiSites,
           query,
+          queryVariants,
           maxSearchPages,
           disableYellowFilter: config.SiteConfig.DisableYellowFilter,
           sourceConcurrency,

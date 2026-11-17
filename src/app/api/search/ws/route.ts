@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 
 import { isGuardFailure, requireActiveUser } from '@/lib/api-auth';
 import { getSearchSourceConcurrency } from '@/lib/cache-budget-profile';
+import { getSearchQueryVariants, toSimplified } from '@/lib/chinese';
 import { getAvailableApiSites, getConfigForRead } from '@/lib/config';
 import { normalizeRuntimeParams } from '@/lib/runtime-params';
 import { collectSearchAggregation } from '@/lib/search-aggregate';
@@ -25,10 +26,10 @@ export async function GET(request: NextRequest) {
   if (isGuardFailure(guardResult)) return guardResult.response;
 
   const { searchParams } = new URL(request.url);
-  const query = searchParams.get('q');
+  const rawQuery = searchParams.get('q');
   const retryParam = searchParams.get('retry');
 
-  if (!query) {
+  if (!rawQuery) {
     return new Response(JSON.stringify({ error: '搜索关键词不能为空' }), {
       status: 400,
       headers: {
@@ -36,6 +37,8 @@ export async function GET(request: NextRequest) {
       },
     });
   }
+  const query = toSimplified(rawQuery);
+  const queryVariants = getSearchQueryVariants(rawQuery);
 
   const config = await getConfigForRead();
   const runtimeParams = normalizeRuntimeParams(config.SiteConfig);
@@ -55,6 +58,7 @@ export async function GET(request: NextRequest) {
   );
   const aggregateCacheParams = {
     query,
+    queryVariants,
     apiSites,
     maxSearchPages,
     disableYellowFilter: config.SiteConfig.DisableYellowFilter,
@@ -75,6 +79,7 @@ export async function GET(request: NextRequest) {
         collectSearchAggregation({
           apiSites,
           query,
+          queryVariants,
           maxSearchPages,
           disableYellowFilter: config.SiteConfig.DisableYellowFilter,
           sourceConcurrency,
@@ -168,6 +173,7 @@ export async function GET(request: NextRequest) {
       const aggregate = await collectSearchAggregation({
         apiSites: targetSites,
         query,
+        queryVariants,
         maxSearchPages,
         disableYellowFilter: config.SiteConfig.DisableYellowFilter,
         sourceConcurrency,

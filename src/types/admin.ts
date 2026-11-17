@@ -38,6 +38,7 @@ export interface AdminConfig {
     DoubanImageProxyType: string;
     DisableYellowFilter: boolean;
     FluidSearch: boolean;
+    TraditionalChinese?: boolean;
     EnableDanmaku: boolean;
     EnableUserDanmaku: boolean;
     DanmakuEpisodeLimit: number;

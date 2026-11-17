@@ -5,6 +5,7 @@
 ## 搜索
 
 - 聚合执行 `runSearchAggregation()`，聚合缓存 `src/lib/search-cache.ts`，失败源冷却 `src/lib/search-aggregate.ts`。不要在页面层重新实现聚合、缓存或失败冷却。
+- 搜索关键词会使用 OpenCC 同时生成简体、繁体变体并在每个源去重合并；本地设置中的「繁体中文显示」默认开启，仅改变搜索结果展示文本，不改变搜索、播放和缓存中的作品标识。
 - `/api/search` 命中新鲜缓存直接返回；命中过期缓存先返回旧结果再后台刷新。
 - 单源异常（含回源额度申请失败）不让整体搜索失败，接口仍可 200；判断源是否可用看健康数据，不看搜索接口状态码。
 - 失败源与空结果分开上报：`searchFromApi()` 默认把第 1 页失败（超时、非 2xx、网络或 JSON 异常，含页缓存里的 `timeout` / `forbidden`）当空结果返回；聚合传 `reportFailure` 让它抛 `SearchSourceUnavailableError`，经 `collectSearchAggregation()` 记入 `failedSources`。这类失败只靠页缓存短期记住，不进整源失败冷却。上游返回 `list` 不是数组时健康样本记 error，但搜索仍按空结果处理。giri / xgcartoon 失败与无结果都返回空数组，不会上报失败。

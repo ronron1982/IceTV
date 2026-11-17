@@ -13,6 +13,7 @@ export const DEFAULT_AGGREGATE_SEARCH_STORAGE_KEY = 'defaultAggregateSearch';
 export const ENABLE_OPTIMIZATION_STORAGE_KEY = 'enableOptimization';
 export const FLUID_SEARCH_STORAGE_KEY = 'fluidSearch';
 export const AUTO_SWITCH_SOURCE_STORAGE_KEY = 'autoSwitchSource';
+export const TRADITIONAL_CHINESE_STORAGE_KEY = 'traditionalChinese';
 export const BLOCK_AD_STORAGE_KEY = 'enable_blockad';
 export const AUTO_PLAY_NEXT_STORAGE_KEY = 'enable_autoplay_next';
 export const PREFERRED_QUALITY_STORAGE_KEY = 'preferredQuality';
@@ -148,6 +149,25 @@ export function writeAutoSwitchSource(value: boolean) {
 
 export function resetAutoSwitchSource() {
   return resetStoredBoolean(AUTO_SWITCH_SOURCE_STORAGE_KEY);
+}
+
+export function readTraditionalChinese(): boolean {
+  if (typeof window === 'undefined') {
+    return true;
+  }
+
+  return (
+    readStoredBoolean(TRADITIONAL_CHINESE_STORAGE_KEY) ??
+    window.RUNTIME_CONFIG?.TRADITIONAL_CHINESE !== false
+  );
+}
+
+export function writeTraditionalChinese(value: boolean) {
+  return writeStoredBoolean(TRADITIONAL_CHINESE_STORAGE_KEY, value);
+}
+
+export function resetTraditionalChinese() {
+  return resetStoredBoolean(TRADITIONAL_CHINESE_STORAGE_KEY);
 }
 
 export function readBlockAdEnabled(): boolean {

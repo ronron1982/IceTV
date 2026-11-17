@@ -15,6 +15,7 @@ import { yellowWords } from '@/lib/yellow';
 export interface SearchAggregationOptions {
   apiSites: ApiSite[];
   query: string;
+  queryVariants?: string[];
   maxSearchPages: number;
   disableYellowFilter: boolean;
   sourceConcurrency: number;
@@ -50,6 +51,7 @@ export function getUpstreamSearchGateStats() {
 export async function runSearchAggregation({
   apiSites,
   query,
+  queryVariants,
   maxSearchPages,
   disableYellowFilter,
   sourceConcurrency,
@@ -98,24 +100,50 @@ export async function runSearchAggregation({
     }
 
     try {
+      const queries = queryVariants?.length ? queryVariants : [query];
       const results = await withAbortableTimeout(
-        (childSignal) =>
-          searchFromApi(site, query, {
-            maxSearchPages,
-            signal: childSignal,
-            reportFailure: true,
-            refreshFirstPage: retryFailed,
-          }),
+        async (childSignal) => {
+          const attempts = await Promise.allSettled(
+            queries.map((variant) =>
+              searchFromApi(site, variant, {
+                maxSearchPages,
+                signal: childSignal,
+                reportFailure: true,
+                refreshFirstPage: retryFailed,
+              }),
+            ),
+          );
+          const successful = attempts
+            .filter(
+              (attempt): attempt is PromiseFulfilledResult<SearchResult[]> =>
+                attempt.status === 'fulfilled',
+            )
+            .flatMap((attempt) => attempt.value);
+          const successfulAttemptCount = attempts.filter(
+            (attempt) => attempt.status === 'fulfilled',
+          ).length;
+          if (successfulAttemptCount === 0 && attempts.length > 0) {
+            throw attempts.find((attempt) => attempt.status === 'rejected')
+              ?.reason;
+          }
+          const seen = new Set<string>();
+          return successful.filter((result) => {
+            const key = `${result.source}|${result.id}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+        },
         sourceHealthTiers?.get(site.key) === 'offline'
           ? Math.min(timeoutMs, SOURCE_HEALTH_OFFLINE_SEARCH_TIMEOUT_MS)
           : timeoutMs,
         `${site.name} timeout`,
         signal,
       );
-      const filteredResults = filterSearchResults(
-        results,
-        query,
-        disableYellowFilter,
+      const filteredResults = results.filter((result) =>
+        queries.some((variant) =>
+          filterSearchResults([result], variant, disableYellowFilter).length,
+        ),
       );
       clearSourceFailureCooldown(site);
       onSourceResult?.(site, filteredResults);

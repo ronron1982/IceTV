@@ -33,6 +33,7 @@ export interface SiteConfig {
   DoubanImageProxyType: string;
   DisableYellowFilter: boolean;
   FluidSearch: boolean;
+  TraditionalChinese: boolean;
 }
 
 // 视频源数据类型

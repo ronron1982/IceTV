@@ -66,6 +66,7 @@ const DEFAULT_SITE_SETTINGS: SiteConfig = {
   SourceCoverProxyMode: DEFAULT_SOURCE_COVER_PROXY_MODE,
   DisableYellowFilter: false,
   FluidSearch: true,
+  TraditionalChinese: true,
 };
 
 type EditableSiteSettings = Pick<
@@ -87,6 +88,7 @@ type EditableSiteSettings = Pick<
   | 'SourceCoverProxyMode'
   | 'DisableYellowFilter'
   | 'FluidSearch'
+  | 'TraditionalChinese'
 >;
 
 const LIVE_ACCESS_OPTIONS = [
@@ -121,6 +123,7 @@ function buildSiteSettings(config: AdminConfig): SiteConfig {
     EnableUserDanmaku: config.SiteConfig.EnableUserDanmaku ?? false,
     DisableYellowFilter: config.SiteConfig.DisableYellowFilter ?? false,
     FluidSearch: config.SiteConfig.FluidSearch ?? true,
+    TraditionalChinese: config.SiteConfig.TraditionalChinese ?? true,
   };
 }
 
@@ -149,6 +152,7 @@ function normalizeEditableSiteSettings(
     ),
     DisableYellowFilter: value.DisableYellowFilter ?? false,
     FluidSearch: value.FluidSearch ?? true,
+    TraditionalChinese: value.TraditionalChinese ?? true,
   };
 }
 

@@ -7,27 +7,32 @@ import {
   readDefaultFluidSearch,
   readEnableOptimization,
   readFluidSearch,
+  readTraditionalChinese,
   resetAggregateSearch,
   resetAutoSwitchSource,
   resetEnableOptimization,
   resetFluidSearch,
+  resetTraditionalChinese,
   writeAggregateSearch,
   writeAutoSwitchSource,
   writeEnableOptimization,
   writeFluidSearch,
+  writeTraditionalChinese,
 } from '@/lib/local-preferences';
 
 export type LocalPreferenceToggleId =
   | 'defaultAggregateSearch'
   | 'enableOptimization'
   | 'fluidSearch'
-  | 'autoSwitchSource';
+  | 'autoSwitchSource'
+  | 'traditionalChinese';
 
 export type LocalPreferenceToggleSiteConfigKey =
   | 'DefaultAggregateSearch'
   | 'EnableOptimization'
   | 'FluidSearch'
-  | 'AutoSwitchSource';
+  | 'AutoSwitchSource'
+  | 'TraditionalChinese';
 
 export type LocalPreferenceToggleState = Record<
   LocalPreferenceToggleId,
@@ -86,6 +91,16 @@ export const localPreferenceToggleDefinitions: LocalPreferenceToggleDefinition[]
       readDefaultValue: readDefaultAutoSwitchSource,
       writeValue: writeAutoSwitchSource,
       resetValue: resetAutoSwitchSource,
+    },
+    {
+      id: 'traditionalChinese',
+      siteConfigKey: 'TraditionalChinese',
+      title: '繁体中文显示',
+      description: '将搜索结果等内容默认显示为繁体中文',
+      readValue: readTraditionalChinese,
+      readDefaultValue: () => true,
+      writeValue: writeTraditionalChinese,
+      resetValue: resetTraditionalChinese,
     },
   ];
 

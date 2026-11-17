@@ -298,6 +298,8 @@ async function getInitConfig(
       DisableYellowFilter:
         process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true',
       FluidSearch: process.env.NEXT_PUBLIC_FLUID_SEARCH !== 'false',
+      TraditionalChinese:
+        process.env.NEXT_PUBLIC_TRADITIONAL_CHINESE !== 'false',
     },
     UserConfig: {
       OpenRegister: false,
@@ -535,6 +537,8 @@ export function configSelfCheck(adminConfig: AdminConfig): AdminConfig {
       DisableYellowFilter:
         process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true',
       FluidSearch: process.env.NEXT_PUBLIC_FLUID_SEARCH !== 'false',
+      TraditionalChinese:
+        process.env.NEXT_PUBLIC_TRADITIONAL_CHINESE !== 'false',
     };
   }
   // 兼容旧配置：补全 SiteIcon 字段
@@ -572,6 +576,10 @@ export function configSelfCheck(adminConfig: AdminConfig): AdminConfig {
     adminConfig.SiteConfig.FluidSearch =
       process.env.NEXT_PUBLIC_FLUID_SEARCH !== 'false';
   }
+  if (typeof adminConfig.SiteConfig.TraditionalChinese !== 'boolean') {
+    adminConfig.SiteConfig.TraditionalChinese =
+      process.env.NEXT_PUBLIC_TRADITIONAL_CHINESE !== 'false';
+  }
   const site = adminConfig.SiteConfig;
   adminConfig.SiteConfig = {
     SiteName: site.SiteName,
@@ -596,6 +604,7 @@ export function configSelfCheck(adminConfig: AdminConfig): AdminConfig {
     ),
     DisableYellowFilter: site.DisableYellowFilter,
     FluidSearch: site.FluidSearch,
+    TraditionalChinese: site.TraditionalChinese,
   };
 
   // 视频源去重
@@ -832,5 +841,6 @@ export async function getPublicConfig() {
       query: category.query,
     })),
     FluidSearch: config.SiteConfig.FluidSearch,
+    TraditionalChinese: config.SiteConfig.TraditionalChinese,
   };
 }

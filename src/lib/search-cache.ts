@@ -20,6 +20,7 @@ export interface SearchPageLoadResult {
 
 export interface SearchAggregateCacheParams {
   query: string;
+  queryVariants?: string[];
   apiSites: ApiSite[];
   maxSearchPages: number;
   disableYellowFilter: boolean;

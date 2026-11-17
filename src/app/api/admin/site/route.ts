@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
       SourceCoverProxyMode,
       DisableYellowFilter,
       FluidSearch,
+      TraditionalChinese,
       SiteIconStagingToken,
       RemoveSiteIcon,
     } = body as {
@@ -65,6 +66,7 @@ export async function POST(request: NextRequest) {
       SourceCoverProxyMode?: string;
       DisableYellowFilter: boolean;
       FluidSearch: boolean;
+      TraditionalChinese: boolean;
       SiteIconStagingToken?: string;
       RemoveSiteIcon?: boolean;
     };
@@ -93,6 +95,7 @@ export async function POST(request: NextRequest) {
         typeof SourceCoverProxyMode !== 'string') ||
       typeof DisableYellowFilter !== 'boolean' ||
       typeof FluidSearch !== 'boolean' ||
+      typeof TraditionalChinese !== 'boolean' ||
       (SiteIconStagingToken !== undefined &&
         typeof SiteIconStagingToken !== 'string') ||
       (RemoveSiteIcon !== undefined && typeof RemoveSiteIcon !== 'boolean')
@@ -176,6 +179,7 @@ export async function POST(request: NextRequest) {
       ),
       DisableYellowFilter,
       FluidSearch,
+      TraditionalChinese,
     };
 
     // 写入数据库

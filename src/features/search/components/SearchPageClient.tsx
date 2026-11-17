@@ -38,6 +38,8 @@ import {
   SEARCH_RESULTS_CONTAINER_CLASS,
 } from '@/features/search/lib/search-layout';
 import { normalizeSearchQueryInput } from '@/features/search/lib/searchQuery';
+import { toTraditional } from '@/lib/chinese';
+import { readTraditionalChinese } from '@/lib/local-preferences';
 import type { SearchFailedSource } from '@/lib/search-failed-sources';
 
 const DEFAULT_FILTER_STATE: FilterState = {
@@ -136,6 +138,7 @@ function AuthenticatedSearchPageClient() {
     useSearchHistory();
   const [searchQuery, setSearchQuery] = useState(activeSearchQuery);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [traditionalChinese] = useState(readTraditionalChinese);
 
   const [filterAll, setFilterAll] = useState<FilterState>(() =>
     createDefaultFilterState(),
@@ -340,6 +343,12 @@ function AuthenticatedSearchPageClient() {
                 renderItem={(item) => {
                   const singleSourceItem =
                     item.group.length === 1 ? item.group[0] : null;
+                  const title = traditionalChinese
+                    ? toTraditional(item.title)
+                    : item.title;
+                  const sourceNames = traditionalChinese
+                    ? item.stats.source_names.map(toTraditional)
+                    : item.stats.source_names;
 
                   return (
                     <VideoCard
@@ -349,14 +358,14 @@ function AuthenticatedSearchPageClient() {
                       source_name={singleSourceItem?.source_name}
                       from='search'
                       isAggregate={true}
-                      title={item.title}
+                      title={title}
                       poster={item.poster}
                       year={item.year}
                       episodes={item.stats.episodes}
-                      source_names={item.stats.source_names}
+                      source_names={sourceNames}
                       douban_id={item.stats.douban_id}
                       query={
-                        activeSearchQuery !== item.title
+                        activeSearchQuery !== title
                           ? activeSearchQuery
                           : ''
                       }
@@ -374,11 +383,19 @@ function AuthenticatedSearchPageClient() {
                 renderItem={(item) => (
                   <VideoCard
                     id={item.id}
-                    title={item.title}
+                    title={
+                      traditionalChinese
+                        ? toTraditional(item.title)
+                        : item.title
+                    }
                     poster={item.poster}
                     episodes={item.episodes.length}
                     source={item.source}
-                    source_name={item.source_name}
+                    source_name={
+                      traditionalChinese
+                        ? toTraditional(item.source_name)
+                        : item.source_name
+                    }
                     douban_id={item.douban_id}
                     query={
                       activeSearchQuery !== item.title ? activeSearchQuery : ''

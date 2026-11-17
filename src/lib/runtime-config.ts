@@ -24,6 +24,7 @@ export interface RuntimeConfig {
   ENABLE_USER_DANMAKU: boolean;
   CUSTOM_CATEGORIES: { name: string; type: 'movie' | 'tv'; query: string }[];
   FLUID_SEARCH: boolean;
+  TRADITIONAL_CHINESE?: boolean;
   VOD_PAGE_TIMEOUT_SECONDS: number;
   VOD_FRAGMENT_TIMEOUT_SECONDS: number;
   PLAYBACK_HISTORY_PAGE_SIZE: number;
@@ -54,6 +55,7 @@ export const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = {
   ENABLE_USER_DANMAKU: false,
   CUSTOM_CATEGORIES: [],
   FLUID_SEARCH: true,
+  TRADITIONAL_CHINESE: true,
   VOD_PAGE_TIMEOUT_SECONDS: 15,
   VOD_FRAGMENT_TIMEOUT_SECONDS: 10,
   PLAYBACK_HISTORY_PAGE_SIZE: 10,
@@ -95,6 +97,7 @@ export type ServerConfigPayload = {
   EnableUserDanmaku?: boolean;
   CustomCategories?: RuntimeConfig['CUSTOM_CATEGORIES'];
   FluidSearch?: boolean;
+  TraditionalChinese?: boolean;
   VodPageTimeoutSeconds?: number;
   VodFragmentTimeoutSeconds?: number;
   PlaybackHistoryPageSize?: number;

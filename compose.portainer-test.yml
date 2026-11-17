@@ -1,0 +1,27 @@
+services:
+  icetv:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: icetv-portainer-test:traditional
+    container_name: icetv-portainer-test
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      ICETV_USERNAME: admin
+      ICETV_PASSWORD: change_this_password
+      AUTH_SECRET: change_this_to_a_random_32_plus_character_secret
+      CRON_SECRET: change_this_to_a_random_secret
+      LOCAL_DB_PATH: /data/icetv-data.sqlite
+      NEXT_PUBLIC_TRADITIONAL_CHINESE: 'true'
+    volumes:
+      - icetv-portainer-test-data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+volumes:
+  icetv-portainer-test-data:
