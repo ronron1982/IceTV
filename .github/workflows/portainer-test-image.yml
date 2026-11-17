@@ -40,6 +40,8 @@ jobs:
           push: true
           tags: |
             ghcr.io/ronron1982/icetv:portainer-test
+            ghcr.io/ronron1982/icetv:traditional-chinese-support
             ghcr.io/ronron1982/icetv:portainer-test-${{ github.sha }}
+            ghcr.io/ronron1982/icetv:traditional-chinese-support-${{ github.sha }}
           build-args: |
-            NEXT_PUBLIC_APP_VERSION=portainer-test
+            NEXT_PUBLIC_APP_VERSION=traditional-chinese-support

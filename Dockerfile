@@ -72,6 +72,9 @@ RUN pnpm run build
 FROM node:22.14-bookworm-slim AS runner
 ARG NEXT_PUBLIC_APP_VERSION
 
+LABEL org.opencontainers.image.title="Traditional Chinese Support 繁體中文支援版"
+LABEL org.opencontainers.image.description="IceTV with traditional Chinese UI, simplified upstream search, FFmpeg downloads, source switching, and download manager."
+
 # 创建非 root 用户，并提供 FFmpeg/FFprobe 供 NAS 转存下载使用
 RUN apt-get update \
   && apt-get install -y --no-install-recommends ffmpeg \
