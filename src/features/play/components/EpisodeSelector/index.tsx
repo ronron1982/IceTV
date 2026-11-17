@@ -691,6 +691,13 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
           </div>
           <button
             type='button'
+            className='mr-3 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 transition-colors hover:bg-gray-900/[0.09] dark:bg-white/[0.06] dark:text-gray-200 dark:hover:bg-white/[0.1]'
+            onClick={() => setDesktopTab('sources')}
+          >
+            换源
+          </button>
+          <button
+            type='button'
             className='mr-3 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 disabled:opacity-50 dark:bg-white/[0.06] dark:text-gray-200'
             onClick={downloadCurrentEpisode}
             disabled={!videoUrl}
