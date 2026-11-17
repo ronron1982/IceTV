@@ -1,7 +1,6 @@
 import './globals.css';
 
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
 import { cookies } from 'next/headers';
 
 import { AuthProvider } from '@/components/AuthProvider';
@@ -16,6 +15,8 @@ import { SiteProvider } from '@/components/SiteProvider';
 import { SWRegister } from '@/components/SWRegister';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import ToastViewport from '@/components/ToastViewport';
+import { TraditionalChineseProvider } from '@/components/TraditionalChineseProvider';
+import { DownloadManagerProvider } from '@/contexts/DownloadManagerContext';
 import { AdminAlertsProvider } from '@/features/admin/components/AdminAlertsProvider';
 import { WatchRecordProvider } from '@/features/watch-record/WatchRecordProvider';
 import { getServerAuthSession } from '@/lib/auth-session.server';
@@ -26,21 +27,6 @@ import { DEFAULT_SITE_FOOTER_TEXT } from '@/lib/site-footer';
 import { getStorageType } from '@/lib/storage-type';
 import { buildThemeInitScript, DEFAULT_THEME } from '@/lib/theme-preference';
 import { CURRENT_UPDATE_BRANCH } from '@/lib/version';
-
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  display: 'swap',
-  fallback: [
-    'system-ui',
-    '-apple-system',
-    'PingFang SC',
-    'Microsoft YaHei',
-    'Hiragino Sans GB',
-    'Noto Sans SC',
-    'sans-serif',
-  ],
-});
 
 const storageType = getStorageType();
 const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'IceTV';
@@ -136,33 +122,35 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body
-        className={`${inter.className} min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-200`}
-      >
+      <body className='min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-200'>
         <ThemeProvider disableTransitionOnChange>
           <RuntimeConfigProvider initialConfig={runtimeConfig}>
-            <SiteProvider
-              siteName={initialSiteName}
-              siteIcon={initialSiteIcon}
-              announcement={initialAnnouncement}
-              footerText={initialFooterText}
-            >
-              <AuthProvider initialSession={initialAuthSession}>
-                <AdminAlertsProvider>
-                  <MessageCenterProvider>
-                    <CardInteractionProvider>
-                      <WatchRecordProvider>{children}</WatchRecordProvider>
-                      <PageScrollRestorer />
-                      <ClientErrorReporter />
-                      <ToastViewport />
-                      <LinuxDoBindNotifier />
-                      <ReleaseNotifier />
-                      <SWRegister />
-                    </CardInteractionProvider>
-                  </MessageCenterProvider>
-                </AdminAlertsProvider>
-              </AuthProvider>
-            </SiteProvider>
+            <TraditionalChineseProvider>
+              <DownloadManagerProvider>
+                <SiteProvider
+                  siteName={initialSiteName}
+                  siteIcon={initialSiteIcon}
+                  announcement={initialAnnouncement}
+                  footerText={initialFooterText}
+                >
+                  <AuthProvider initialSession={initialAuthSession}>
+                    <AdminAlertsProvider>
+                      <MessageCenterProvider>
+                        <CardInteractionProvider>
+                          <WatchRecordProvider>{children}</WatchRecordProvider>
+                          <PageScrollRestorer />
+                          <ClientErrorReporter />
+                          <ToastViewport />
+                          <LinuxDoBindNotifier />
+                          <ReleaseNotifier />
+                          <SWRegister />
+                        </CardInteractionProvider>
+                      </MessageCenterProvider>
+                    </AdminAlertsProvider>
+                  </AuthProvider>
+                </SiteProvider>
+              </DownloadManagerProvider>
+            </TraditionalChineseProvider>
           </RuntimeConfigProvider>
         </ThemeProvider>
       </body>

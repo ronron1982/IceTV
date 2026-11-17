@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 
 import { isGuardFailure, requireActiveUser } from '@/lib/api-auth';
 import { getSearchSourceConcurrency } from '@/lib/cache-budget-profile';
-import { getSearchQueryVariants, toSimplified } from '@/lib/chinese';
+import { toSimplified } from '@/lib/chinese';
 import { getAvailableApiSites, getConfigForRead } from '@/lib/config';
 import { normalizeRuntimeParams } from '@/lib/runtime-params';
 import { collectSearchAggregation } from '@/lib/search-aggregate';
@@ -38,7 +38,8 @@ export async function GET(request: NextRequest) {
     });
   }
   const query = toSimplified(rawQuery);
-  const queryVariants = getSearchQueryVariants(rawQuery);
+  // 上游 API 大多只建立了简体索引；繁体只用于 UI 显示，不能作为上游查询变体。
+  const queryVariants = [query];
 
   const config = await getConfigForRead();
   const runtimeParams = normalizeRuntimeParams(config.SiteConfig);

@@ -100,11 +100,11 @@
   }
 }
 
-/* 细字重由路由 layout 单独加载的 Inter 提供，中文回退到系统字体 */
+/* 中文回退到系统字体；不依赖构建时下载远程字体 */
 .recap-root .font-extralight,
 .recap-root .font-light {
   font-family:
-    var(--font-recap-light),
+    var(--font-recap-light, system-ui),
     system-ui,
     -apple-system,
     'PingFang SC',

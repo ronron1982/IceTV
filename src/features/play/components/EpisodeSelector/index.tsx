@@ -24,6 +24,7 @@ import {
 } from '@/components/PlayerPanelTabBar';
 import { useRuntimeConfig } from '@/components/RuntimeConfigProvider';
 import SkeletonText from '@/components/SkeletonText';
+import { useDownloadManager } from '@/contexts/DownloadManagerContext';
 import { EpisodesTab } from '@/features/play/components/EpisodeSelector/EpisodesTab';
 import type { InfoRating } from '@/features/play/components/EpisodeSelector/InfoTab';
 import {
@@ -240,6 +241,7 @@ interface EpisodeSelectorProps {
   onAddSources?: (newSources: SearchResult[]) => void;
   onDanmakuReload?: DanmakuReloadHandler;
   onDanmakuHeatmapChange?: (enabled: boolean) => void;
+  videoUrl?: string;
 }
 
 type MobileSheetKey = 'episodes' | 'sources' | 'danmaku' | 'reviews';
@@ -273,9 +275,27 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
   onAddSources,
   onDanmakuReload,
   onDanmakuHeatmapChange,
+  videoUrl = '',
 }) => {
   const runtimeConfig = useRuntimeConfig();
   const danmakuEnabled = runtimeConfig.ENABLE_DANMAKU;
+  const { enqueueDownload, openManager } = useDownloadManager();
+  const downloadTitle = `${videoTitle || detail?.title || '影片'} 第${value}集`;
+  const downloadCurrentEpisode = useCallback(() => {
+    if (!videoUrl) return;
+    void enqueueDownload({
+      title: downloadTitle,
+      url: videoUrl,
+    });
+  }, [downloadTitle, enqueueDownload, videoUrl]);
+  const downloadCurrentEpisodeWithFfmpeg = useCallback(() => {
+    if (!videoUrl) return;
+    void enqueueDownload({
+      title: downloadTitle,
+      url: videoUrl,
+      channel: 'ffmpeg',
+    });
+  }, [downloadTitle, enqueueDownload, videoUrl]);
 
   const variantSources = useMemo(() => {
     if (!detail) {
@@ -553,6 +573,29 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
               <Star className='h-3.5 w-3.5' />
               评价
             </button>
+            <button
+              type='button'
+              className={mobileActionButtonClass}
+              onClick={downloadCurrentEpisode}
+              disabled={!videoUrl}
+            >
+              下载当前集
+            </button>
+            <button
+              type='button'
+              className={mobileActionButtonClass}
+              onClick={downloadCurrentEpisodeWithFfmpeg}
+              disabled={!videoUrl}
+            >
+              FFmpeg 转存
+            </button>
+            <button
+              type='button'
+              className={mobileActionButtonClass}
+              onClick={openManager}
+            >
+              下载管理
+            </button>
           </div>
         </div>
 
@@ -638,11 +681,38 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
       <div
         className={`hidden min-h-0 flex-1 flex-col md:flex ${PLAYER_PANEL_SURFACE_CLASS}`}
       >
-        <TabBar
-          tabs={desktopTabs}
-          active={desktopTab}
-          onChange={setDesktopTab}
-        />
+        <div className='flex items-center gap-2'>
+          <div className='min-w-0 flex-1'>
+            <TabBar
+              tabs={desktopTabs}
+              active={desktopTab}
+              onChange={setDesktopTab}
+            />
+          </div>
+          <button
+            type='button'
+            className='mr-3 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 disabled:opacity-50 dark:bg-white/[0.06] dark:text-gray-200'
+            onClick={downloadCurrentEpisode}
+            disabled={!videoUrl}
+          >
+            下载当前集
+          </button>
+          <button
+            type='button'
+            className='mr-3 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 disabled:opacity-50 dark:bg-white/[0.06] dark:text-gray-200'
+            onClick={downloadCurrentEpisodeWithFfmpeg}
+            disabled={!videoUrl}
+          >
+            FFmpeg 转存
+          </button>
+          <button
+            type='button'
+            className='mr-3 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 dark:bg-white/[0.06] dark:text-gray-200'
+            onClick={openManager}
+          >
+            下载管理
+          </button>
+        </div>
 
         <PlayerPanelContent>
           {desktopTab === 'main' &&

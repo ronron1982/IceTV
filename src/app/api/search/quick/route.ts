@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { isGuardFailure, requireActiveUser } from '@/lib/api-auth';
+import { toSimplified } from '@/lib/chinese';
 import { waitForSharedLoad } from '@/lib/concurrency';
 import type { ApiSite } from '@/lib/config';
 import { getAvailableApiSites, getConfigForRead } from '@/lib/config';
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
   if (isGuardFailure(guardResult)) return guardResult.response;
 
   const { searchParams } = new URL(request.url);
-  const query = (searchParams.get('q') || '').trim();
+  const query = toSimplified((searchParams.get('q') || '').trim());
   const year = searchParams.get('year') || '';
   const searchTypeParam = searchParams.get('stype') || '';
   const searchType =

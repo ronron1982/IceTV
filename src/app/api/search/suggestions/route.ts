@@ -9,6 +9,7 @@ import {
   isGuardFailure,
   requireActiveUser,
 } from '@/lib/api-auth';
+import { toSimplified } from '@/lib/chinese';
 import { getAvailableApiSites, getConfigForRead } from '@/lib/config';
 import { searchFirstPageFromApi } from '@/lib/downstream';
 import { getSourceHealthTiers } from '@/lib/source-health.server';
@@ -25,7 +26,9 @@ export async function GET(request: NextRequest) {
 
     const config = await getConfigForRead();
     const { searchParams } = new URL(request.url);
-    const query = normalizeSearchQueryInput(searchParams.get('q') || '');
+    const query = toSimplified(
+      normalizeSearchQueryInput(searchParams.get('q') || ''),
+    );
 
     if (!shouldRequestSearchSuggestions(query)) {
       return NextResponse.json(

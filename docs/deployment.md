@@ -40,6 +40,15 @@ docker compose up -d
 
 访问 `http://localhost:3000`，用配置的站长账号登录。项目不内置播放源，需在后台配置。
 
+### FFmpeg 转存下载
+
+Docker 镜像运行阶段会内置 `ffmpeg` 与 `ffprobe`。播放页的「FFmpeg 转存」会在 NAS
+容器内下载并合并 HLS/M3U8，完成后由「下载管理」提供 MP4 文件下载。转存文件默认保存
+在 `/data/downloads`，已随 `/data` 数据卷持久化；可用 `FFMPEG_DOWNLOAD_DIR` 改变目录。
+
+该功能需要容器能够访问来源视频地址，并建议为 `/data` 预留足够空间。浏览器下载只适合
+来源直接提供 MP4 等单文件的情况；M3U8 必须使用 FFmpeg 转存。
+
 ### Portainer 测试部署
 
 测试分支可在 Portainer 的 **Stacks → Add stack → Git repository** 中部署：

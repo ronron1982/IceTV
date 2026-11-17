@@ -70,6 +70,7 @@ interface PlayMainContentProps {
   onLoadingTimeout?: () => boolean | void;
   playbackError?: string | null;
   playbackIntentRef?: RefObject<VodPlaybackIntent>;
+  videoUrl?: string;
 }
 
 const SOURCE_RECOMMENDATION_AUTO_DISMISS_MS = 5000;
@@ -252,6 +253,7 @@ export function PlayMainContent(props: PlayMainContentProps) {
     realtimeLoadSpeed,
     playbackError,
     playbackIntentRef,
+    videoUrl,
   } = props;
 
   const [loadingTimedOut, setLoadingTimedOut] = useState(false);
@@ -459,6 +461,7 @@ export function PlayMainContent(props: PlayMainContentProps) {
           onAddSources={onAddSources}
           onDanmakuReload={onDanmakuReload}
           onDanmakuHeatmapChange={onDanmakuHeatmapChange}
+          videoUrl={videoUrl}
         />
       }
     />

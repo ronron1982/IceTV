@@ -129,6 +129,23 @@ it('preserves configured source order on the empty health fallback', async () =>
 });
 
 it.each([GET, streamGET])(
+  'sends only the simplified query to upstream sources',
+  async (handler) => {
+    const response = await handler(
+      request('?q=%E7%8B%97%E7%8B%97%E7%9A%84%E5%AE%8C%E7%BE%8E%E8%81%96%E8%AA%95'),
+    );
+    await response.text();
+
+    expect(runSearchAggregation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: '狗狗的完美圣诞',
+        queryVariants: ['狗狗的完美圣诞'],
+      }),
+    );
+  },
+);
+
+it.each([GET, streamGET])(
   'keeps health ordering and timeout tiers in stale refreshes',
   async (handler) => {
     (peekCachedSearchAggregate as jest.Mock).mockReturnValue({

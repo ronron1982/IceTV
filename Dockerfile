@@ -72,9 +72,14 @@ RUN pnpm run build
 FROM node:22.14-bookworm-slim AS runner
 ARG NEXT_PUBLIC_APP_VERSION
 
-# 创建非 root 用户
-RUN groupadd --gid 1001 nodejs && useradd --uid 1001 --gid nodejs --create-home --shell /usr/sbin/nologin nextjs
+# 创建非 root 用户，并提供 FFmpeg/FFprobe 供 NAS 转存下载使用
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ffmpeg \
+  && rm -rf /var/lib/apt/lists/* \
+  && groupadd --gid 1001 nodejs \
+  && useradd --uid 1001 --gid nodejs --create-home --shell /usr/sbin/nologin nextjs
 RUN mkdir -p /data && chown -R nextjs:nodejs /data
+RUN mkdir -p /data/downloads && chown -R nextjs:nodejs /data/downloads
 
 WORKDIR /app
 ENV NODE_ENV=production
@@ -83,6 +88,7 @@ ENV PORT=3000
 ENV DOCKER_ENV=true
 ENV LOCAL_DB_PATH=/data/icetv-data.sqlite
 ENV CRON_LOCK_PATH=/data/icetv-cron.lock
+ENV FFMPEG_DOWNLOAD_DIR=/data/downloads
 ENV NEXT_PUBLIC_APP_VERSION=${NEXT_PUBLIC_APP_VERSION}
 
 # 从构建器中复制 standalone 输出

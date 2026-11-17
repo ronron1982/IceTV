@@ -11,6 +11,7 @@ services:
       AUTH_SECRET: change_this_to_a_random_32_plus_character_secret
       CRON_SECRET: change_this_to_a_random_secret
       LOCAL_DB_PATH: /data/icetv-data.sqlite
+      FFMPEG_DOWNLOAD_DIR: /data/downloads
       NEXT_PUBLIC_TRADITIONAL_CHINESE: 'true'
     volumes:
       - icetv-portainer-test-data:/data

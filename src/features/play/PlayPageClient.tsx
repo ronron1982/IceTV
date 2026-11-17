@@ -865,6 +865,7 @@ function AuthenticatedPlayPageClient({
       currentEpisodeIndex={currentEpisodeIndex}
       isEpisodeSelectorCollapsed={isEpisodeSelectorCollapsed}
       setIsEpisodeSelectorCollapsed={setIsEpisodeSelectorCollapsed}
+      videoUrl={videoUrl}
       artRef={artRef}
       isVideoLoading={isVideoLoading}
       videoLoadingStage={videoLoadingStage}

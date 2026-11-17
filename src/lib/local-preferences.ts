@@ -163,7 +163,15 @@ export function readTraditionalChinese(): boolean {
 }
 
 export function writeTraditionalChinese(value: boolean) {
-  return writeStoredBoolean(TRADITIONAL_CHINESE_STORAGE_KEY, value);
+  const result = writeStoredBoolean(TRADITIONAL_CHINESE_STORAGE_KEY, value);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('traditional-chinese-preference-updated', {
+        detail: value,
+      }),
+    );
+  }
+  return result;
 }
 
 export function resetTraditionalChinese() {
