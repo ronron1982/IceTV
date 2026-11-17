@@ -41,6 +41,7 @@ import { useLongPress } from '@/hooks/useLongPress';
 import { buildExternalSubjectUrl } from '@/hooks/usePosterPlay';
 import { getAuthInfoFromBrowserCookie } from '@/lib/auth.client';
 import { isCatalogFavoriteSource } from '@/lib/catalog-favorites';
+import { toSimplified } from '@/lib/chinese';
 import {
   deleteFavorite,
   deletePlayRecord,
@@ -178,6 +179,8 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(
       [dynamicSourceNames, isAggregate],
     );
     const actualQuery = query || '';
+    const upstreamTitle = toSimplified(actualTitle.trim());
+    const upstreamQuery = toSimplified(actualQuery.trim());
     // 豆瓣卡片与目录收藏没有可播放源，按标题搜索起播
     const playsByTitle =
       from === 'douban' ||
@@ -437,36 +440,36 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(
         if (localTarget) {
           return `/play?source=${encodeURIComponent(localTarget.source)}&id=${encodeURIComponent(
             localTarget.id,
-          )}&title=${encodeURIComponent(actualTitle.trim())}${
+          )}&title=${encodeURIComponent(upstreamTitle)}${
             actualYear ? `&year=${actualYear}` : ''
           }${actualSearchType ? `&stype=${actualSearchType}` : ''}${
-            actualQuery
-              ? `&stitle=${encodeURIComponent(actualQuery.trim())}`
+            upstreamQuery
+              ? `&stitle=${encodeURIComponent(upstreamQuery)}`
               : ''
           }`;
         }
       }
       if (playsByTitle || (isAggregate && !actualSource && !actualId)) {
         saveAggregateGroup();
-        return `/play?title=${encodeURIComponent(actualTitle.trim())}${
+        return `/play?title=${encodeURIComponent(upstreamTitle)}${
           actualYear ? `&year=${actualYear}` : ''
         }${actualSearchType ? `&stype=${actualSearchType}` : ''}${
           isAggregate && !isSingleAggregate ? '&prefer=true' : ''
         }${isSingleAggregate ? '&singleSource=true' : ''}${
           isDirectStartup ? '&directStart=true' : ''
         }${
-          actualQuery ? `&stitle=${encodeURIComponent(actualQuery.trim())}` : ''
+          upstreamQuery ? `&stitle=${encodeURIComponent(upstreamQuery)}` : ''
         }`;
       }
       if (actualSource && actualId) {
         return `/play?source=${actualSource}&id=${actualId}&title=${encodeURIComponent(
-          actualTitle,
+          upstreamTitle,
         )}${actualYear ? `&year=${actualYear}` : ''}${
           isAggregate && !isSingleAggregate ? '&prefer=true' : ''
         }${isSingleAggregate ? '&singleSource=true' : ''}${
           isDirectStartup ? '&directStart=true' : ''
         }${
-          actualQuery ? `&stitle=${encodeURIComponent(actualQuery.trim())}` : ''
+          upstreamQuery ? `&stitle=${encodeURIComponent(upstreamQuery)}` : ''
         }${actualSearchType ? `&stype=${actualSearchType}` : ''}`;
       }
       return null;
@@ -480,7 +483,8 @@ const VideoCard = forwardRef<VideoCardHandle, VideoCardProps>(
       isAggregate,
       isSingleAggregate,
       isDirectStartup,
-      actualQuery,
+      upstreamQuery,
+      upstreamTitle,
       actualSearchType,
       saveAggregateGroup,
     ]);

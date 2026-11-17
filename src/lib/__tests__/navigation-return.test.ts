@@ -30,6 +30,18 @@ describe('navigation return', () => {
     expect(parsed.searchParams.get('returnTo')).toBe('/douban?type=tv');
   });
 
+  it('搜索返回地址中的繁体查询会统一转换为简体', () => {
+    const target = withReturnTo(
+      '/play?title=%E7%8B%97%E7%8B%97%E7%9A%84%E5%AE%8C%E7%BE%8E%E5%9C%A3%E8%AF%9E',
+      '/search?q=%E7%8B%97%E7%8B%97%E7%9A%84%E5%AE%8C%E7%BE%8E%E8%81%96%E8%AA%95',
+    );
+    const parsed = new URL(target, 'https://icetv.local');
+
+    expect(parsed.searchParams.get('returnTo')).toBe(
+      '/search?q=%E7%8B%97%E7%8B%97%E7%9A%84%E5%AE%8C%E7%BE%8E%E5%9C%A3%E8%AF%9E',
+    );
+  });
+
   it('为直播地址写入完整来源页面', () => {
     const target = withReturnTo(
       '/live',

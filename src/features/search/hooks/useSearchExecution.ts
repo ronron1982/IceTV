@@ -8,6 +8,7 @@ import {
 } from '@/features/search/lib/searchSnapshotCache';
 import { sortBatchForNoOrder } from '@/features/search/lib/searchUtils';
 import { useClientHydrated } from '@/hooks/useClientHydrated';
+import { toSimplified } from '@/lib/chinese';
 import { addSearchHistory } from '@/lib/db.client';
 import { readFluidSearch } from '@/lib/local-preferences';
 import {
@@ -152,6 +153,7 @@ export function useSearchExecution({
       setShowResults(true);
 
       const trimmed = query;
+      const upstreamQuery = toSimplified(trimmed);
 
       // 每次搜索时重新读取设置
       let currentFluidSearch = true;
@@ -163,7 +165,7 @@ export function useSearchExecution({
       if (currentFluidSearch) {
         // 流式搜索
         const es = new EventSource(
-          `/api/search/ws?q=${encodeURIComponent(trimmed)}`,
+          `/api/search/ws?q=${encodeURIComponent(upstreamQuery)}`,
         );
         eventSourceRef.current = es;
 
@@ -268,7 +270,7 @@ export function useSearchExecution({
         };
       } else {
         // 传统搜索
-        fetch(`/api/search?q=${encodeURIComponent(trimmed)}`, {
+        fetch(`/api/search?q=${encodeURIComponent(upstreamQuery)}`, {
           signal: controller.signal,
         })
           .then(async (response) => {
@@ -379,7 +381,7 @@ export function useSearchExecution({
     if (!searchQuery || targets.length === 0 || retryStreamRef.current) return;
 
     const params = new URLSearchParams({
-      q: searchQuery,
+      q: toSimplified(searchQuery),
       retry: targets.map((s) => s.key).join(','),
     });
     const es = new EventSource(`/api/search/ws?${params}`);

@@ -1,6 +1,7 @@
+import { toSimplified } from '@/lib/chinese';
+
 const INTERNAL_ORIGIN = 'https://icetv.local';
 const MAX_INTERNAL_PATH_LENGTH = 2048;
-
 export const RETURN_TO_PARAM = 'returnTo';
 export const PLAYER_EXIT_EVENT = 'icetv:player-exit';
 
@@ -30,6 +31,11 @@ export function normalizeInternalReturnPath(
   const parsed = parseInternalPath(value);
   if (!parsed || parsed.pathname.startsWith('/play')) {
     return `${fallbackUrl.pathname}${fallbackUrl.search}${fallbackUrl.hash}`;
+  }
+
+  if (parsed.pathname === '/search') {
+    const query = parsed.searchParams.get('q');
+    if (query) parsed.searchParams.set('q', toSimplified(query));
   }
 
   return `${parsed.pathname}${parsed.search}${parsed.hash}`;

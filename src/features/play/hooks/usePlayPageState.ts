@@ -12,6 +12,7 @@ import type { SourceSwitchEpisodeAnchor } from '@/features/play/lib/episodeResum
 import type { WakeLockSentinel } from '@/features/play/lib/playTypes';
 import type { ResumeMode } from '@/features/play/lib/resumePlayback';
 import type { SourceSwitchCleanupTask } from '@/features/play/lib/sourceSwitchCleanup';
+import { toSimplified } from '@/lib/chinese';
 import {
   readAutoPlayNextEnabled,
   readBlockAdEnabled,
@@ -88,7 +89,9 @@ export function usePlayPageState(searchParams: ReadonlyURLSearchParams) {
     autoPlayNextEnabledRef.current = autoPlayNextEnabled;
   }, [autoPlayNextEnabled]);
 
-  const [videoTitle, setVideoTitle] = useState(searchParams.get('title') || '');
+  const [videoTitle, setVideoTitle] = useState(
+    toSimplified(searchParams.get('title') || ''),
+  );
   const [videoYear, setVideoYear] = useState(searchParams.get('year') || '');
   const [videoCover, setVideoCover] = useState('');
   const [videoDoubanId, setVideoDoubanId] = useState(0);
@@ -97,7 +100,9 @@ export function usePlayPageState(searchParams: ReadonlyURLSearchParams) {
   );
   const [currentId, setCurrentId] = useState(searchParams.get('id') || '');
 
-  const [searchTitle] = useState(searchParams.get('stitle') || '');
+  const [searchTitle] = useState(
+    toSimplified(searchParams.get('stitle') || ''),
+  );
   const [searchType] = useState(searchParams.get('stype') || '');
 
   const [needPrefer, setNeedPrefer] = useState(
