@@ -681,8 +681,8 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
       <div
         className={`hidden min-h-0 flex-1 flex-col md:flex ${PLAYER_PANEL_SURFACE_CLASS}`}
       >
-        <div className='flex items-center gap-2'>
-          <div className='min-w-0 flex-1'>
+        <div className='flex flex-wrap items-center gap-2 pb-1'>
+          <div className='min-w-[240px] basis-full flex-1 md:basis-auto'>
             <TabBar
               tabs={desktopTabs}
               active={desktopTab}
@@ -691,14 +691,14 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
           </div>
           <button
             type='button'
-            className='mr-3 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 transition-colors hover:bg-gray-900/[0.09] dark:bg-white/[0.06] dark:text-gray-200 dark:hover:bg-white/[0.1]'
+            className='shrink-0 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 transition-colors hover:bg-gray-900/[0.09] dark:bg-white/[0.06] dark:text-gray-200 dark:hover:bg-white/[0.1]'
             onClick={() => setDesktopTab('sources')}
           >
             换源
           </button>
           <button
             type='button'
-            className='mr-3 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 disabled:opacity-50 dark:bg-white/[0.06] dark:text-gray-200'
+            className='shrink-0 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 disabled:opacity-50 dark:bg-white/[0.06] dark:text-gray-200'
             onClick={downloadCurrentEpisode}
             disabled={!videoUrl}
           >
@@ -706,7 +706,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
           </button>
           <button
             type='button'
-            className='mr-3 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 disabled:opacity-50 dark:bg-white/[0.06] dark:text-gray-200'
+            className='shrink-0 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 disabled:opacity-50 dark:bg-white/[0.06] dark:text-gray-200'
             onClick={downloadCurrentEpisodeWithFfmpeg}
             disabled={!videoUrl}
           >
@@ -714,7 +714,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
           </button>
           <button
             type='button'
-            className='mr-3 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 dark:bg-white/[0.06] dark:text-gray-200'
+            className='shrink-0 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 dark:bg-white/[0.06] dark:text-gray-200'
             onClick={openManager}
           >
             下载管理

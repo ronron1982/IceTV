@@ -43,6 +43,8 @@ export type DownloadRequest = {
 type DownloadContextValue = {
   tasks: DownloadTask[];
   enqueueDownload: (request: DownloadRequest) => Promise<string>;
+  removeTask: (id: string) => Promise<void>;
+  clearTasks: () => Promise<void>;
   openManager: () => void;
 };
 
@@ -344,9 +346,43 @@ export function DownloadManagerProvider({ children }: { children: ReactNode }) {
     [runBrowserDownload, runFfmpegDownload],
   );
 
+  const removeTask = useCallback(
+    async (id: string) => {
+      const task = tasks.find((item) => item.id === id);
+      if (task?.ffmpegJobId) {
+        try {
+          await requestFfmpeg({ action: 'remove', id: task.ffmpegJobId });
+        } catch {
+          // 本地任务仍应可清除，即使服务端任务已过期。
+        }
+      }
+      setTasks((current) => current.filter((item) => item.id !== id));
+    },
+    [tasks],
+  );
+
+  const clearTasks = useCallback(async () => {
+    const ffmpegJobs = tasks.filter((task) => task.ffmpegJobId);
+    await Promise.all(
+      ffmpegJobs.map((task) =>
+        requestFfmpeg({
+          action: 'remove',
+          id: task.ffmpegJobId as string,
+        }).catch(() => undefined),
+      ),
+    );
+    setTasks([]);
+  }, [tasks]);
+
   const value = useMemo(
-    () => ({ tasks, enqueueDownload, openManager: () => setIsOpen(true) }),
-    [enqueueDownload, tasks],
+    () => ({
+      tasks,
+      enqueueDownload,
+      removeTask,
+      clearTasks,
+      openManager: () => setIsOpen(true),
+    }),
+    [enqueueDownload, clearTasks, removeTask, tasks],
   );
 
   return (
@@ -354,23 +390,43 @@ export function DownloadManagerProvider({ children }: { children: ReactNode }) {
       {children}
       {isOpen && (
         <div className='fixed inset-0 z-[1000] flex items-end justify-end bg-black/30 p-4'>
-          <section className='w-full max-w-md rounded-xl bg-white p-4 shadow-xl dark:bg-gray-900'>
+          <section className='flex max-h-[70dvh] w-full max-w-md flex-col rounded-xl bg-white p-4 shadow-xl dark:bg-gray-900'>
             <div className='mb-3 flex items-center justify-between'>
               <h2 className='font-semibold'>下载管理</h2>
-              <button type='button' onClick={() => setIsOpen(false)}>
-                关闭
-              </button>
+              <div className='flex items-center gap-3'>
+                {tasks.length > 0 && (
+                  <button
+                    type='button'
+                    className='text-sm text-red-500 hover:text-red-600'
+                    onClick={() => void clearTasks()}
+                  >
+                    清除全部
+                  </button>
+                )}
+                <button type='button' onClick={() => setIsOpen(false)}>
+                  关闭
+                </button>
+              </div>
             </div>
             {tasks.length === 0 ? (
               <p className='text-sm text-gray-500'>暂无下载任务</p>
             ) : (
-              <ul className='space-y-2 text-sm'>
+              <ul className='min-h-0 space-y-2 overflow-y-auto pr-1 text-sm scrollbar-thin'>
                 {tasks.map((task) => (
                   <li
                     key={task.id}
                     className='rounded-lg bg-gray-100 p-2 dark:bg-gray-800'
                   >
-                    <div className='truncate'>{task.title}</div>
+                    <div className='flex items-start justify-between gap-2'>
+                      <div className='truncate'>{task.title}</div>
+                      <button
+                        type='button'
+                        className='shrink-0 text-xs text-gray-500 hover:text-red-500'
+                        onClick={() => void removeTask(task.id)}
+                      >
+                        清除
+                      </button>
+                    </div>
                     {task.status === 'error' ? (
                       <div className='text-xs text-red-500'>{task.error || '失败'}</div>
                     ) : (
