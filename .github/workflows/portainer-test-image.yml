@@ -37,6 +37,8 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/ronron1982/icetv:portainer-test
+          tags: |
+            ghcr.io/ronron1982/icetv:portainer-test
+            ghcr.io/ronron1982/icetv:portainer-test-${{ github.sha }}
           build-args: |
             NEXT_PUBLIC_APP_VERSION=portainer-test
