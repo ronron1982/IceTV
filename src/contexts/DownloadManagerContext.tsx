@@ -263,7 +263,9 @@ export function DownloadManagerProvider({ children }: { children: ReactNode }) {
     }
     const blob = await downloadWithProgress(task.url, (received, total) => {
       const progress =
-        total > 0 ? Math.min(99.5, (received / total) * 100) : 0;
+        total > 0
+          ? Math.min(99.5, (received / total) * 100)
+          : Math.min(95, 5 + received / (1024 * 1024));
       patchTask(setTasks, task.id, { status: 'downloading', progress });
     });
     const blobUrl = URL.createObjectURL(blob);
@@ -411,7 +413,7 @@ export function DownloadManagerProvider({ children }: { children: ReactNode }) {
             {tasks.length === 0 ? (
               <p className='text-sm text-gray-500'>暂无下载任务</p>
             ) : (
-              <ul className='min-h-0 space-y-2 overflow-y-auto pr-1 text-sm scrollbar-thin'>
+              <ul className='min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain pr-1 text-sm scrollbar-thin'>
                 {tasks.map((task) => (
                   <li
                     key={task.id}
@@ -435,16 +437,34 @@ export function DownloadManagerProvider({ children }: { children: ReactNode }) {
                           <span>{task.channel === 'ffmpeg' ? 'FFmpeg 转存' : '浏览器下载'}</span>
                           <span>{task.status === 'completed' ? '已完成' : `${Math.round(task.progress)}%`}</span>
                         </div>
-                        <div className='mt-2 h-2 overflow-hidden rounded-full bg-gray-300 dark:bg-gray-700'>
+                        <div
+                          role='progressbar'
+                          aria-label={`${task.title} 下载进度`}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={Math.round(task.progress)}
+                          className='mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-300 dark:bg-gray-700'
+                        >
                           <div
-                            className={`h-full transition-[width] duration-300 ${
+                            className={`h-full rounded-full transition-[width] duration-500 ease-out ${
                               task.status === 'completed'
                                 ? 'bg-green-500'
                                 : task.status === 'paused'
                                   ? 'bg-yellow-500'
-                                  : 'bg-blue-500'
+                                  : 'bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500'
                             }`}
-                            style={{ width: `${Math.max(0, Math.min(100, task.progress))}%` }}
+                            style={{
+                              width: `${
+                                task.status === 'completed'
+                                  ? 100
+                                  : task.progress > 0
+                                    ? Math.max(2, Math.min(100, task.progress))
+                                    : task.status === 'queued' ||
+                                        task.status === 'starting'
+                                      ? 4
+                                      : 8
+                              }%`,
+                            }}
                           />
                         </div>
                       </>
