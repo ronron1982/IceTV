@@ -79,7 +79,7 @@ function InfoTabLoading({
       }`.trim()}
     >
       <div
-        className={`skeleton flex-shrink-0 self-start rounded-lg ${INFO_COVER_CLASS}`}
+        className={`skeleton flex-shrink-0 rounded-lg ${INFO_COVER_CLASS}`}
       />
       <div className='flex min-w-0 flex-1 flex-col justify-between gap-2'>
         <div className='space-y-1.5'>
@@ -241,6 +241,8 @@ interface EpisodeSelectorProps {
   onAddSources?: (newSources: SearchResult[]) => void;
   onDanmakuReload?: DanmakuReloadHandler;
   onDanmakuHeatmapChange?: (enabled: boolean) => void;
+  /** 递增时打开换源面板（播放失败提示里的「选择其他源」） */
+  openSourcesRequest?: number;
   videoUrl?: string;
 }
 
@@ -275,27 +277,13 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
   onAddSources,
   onDanmakuReload,
   onDanmakuHeatmapChange,
+  openSourcesRequest = 0,
   videoUrl = '',
 }) => {
   const runtimeConfig = useRuntimeConfig();
   const danmakuEnabled = runtimeConfig.ENABLE_DANMAKU;
   const { enqueueDownload, openManager } = useDownloadManager();
   const downloadTitle = `${videoTitle || detail?.title || '影片'} 第${value}集`;
-  const downloadCurrentEpisode = useCallback(() => {
-    if (!videoUrl) return;
-    void enqueueDownload({
-      title: downloadTitle,
-      url: videoUrl,
-    });
-  }, [downloadTitle, enqueueDownload, videoUrl]);
-  const downloadCurrentEpisodeWithFfmpeg = useCallback(() => {
-    if (!videoUrl) return;
-    void enqueueDownload({
-      title: downloadTitle,
-      url: videoUrl,
-      channel: 'ffmpeg',
-    });
-  }, [downloadTitle, enqueueDownload, videoUrl]);
 
   const variantSources = useMemo(() => {
     if (!detail) {
@@ -346,6 +334,11 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
     url.searchParams.delete('tab');
     window.history.replaceState(null, '', url);
   }, [reviewsRequest]);
+  useEffect(() => {
+    if (!openSourcesRequest) return;
+    setDesktopTab('sources');
+    if (window.matchMedia(MOBILE_QUERY).matches) setMobileSheet('sources');
+  }, [openSourcesRequest]);
   const [reviewEditRequested, setReviewEditRequested] = useState(false);
 
   const reviews = useVideoReviews({
@@ -576,7 +569,9 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
             <button
               type='button'
               className={mobileActionButtonClass}
-              onClick={downloadCurrentEpisode}
+              onClick={() =>
+                void enqueueDownload({ title: downloadTitle, url: videoUrl })
+              }
               disabled={!videoUrl}
             >
               下载当前集
@@ -584,7 +579,13 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
             <button
               type='button'
               className={mobileActionButtonClass}
-              onClick={downloadCurrentEpisodeWithFfmpeg}
+              onClick={() =>
+                void enqueueDownload({
+                  title: downloadTitle,
+                  url: videoUrl,
+                  channel: 'ffmpeg',
+                })
+              }
               disabled={!videoUrl}
             >
               FFmpeg 转存
@@ -691,15 +692,10 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
           </div>
           <button
             type='button'
-            className='shrink-0 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 transition-colors hover:bg-gray-900/[0.09] dark:bg-white/[0.06] dark:text-gray-200 dark:hover:bg-white/[0.1]'
-            onClick={() => setDesktopTab('sources')}
-          >
-            换源
-          </button>
-          <button
-            type='button'
             className='shrink-0 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 disabled:opacity-50 dark:bg-white/[0.06] dark:text-gray-200'
-            onClick={downloadCurrentEpisode}
+            onClick={() =>
+              void enqueueDownload({ title: downloadTitle, url: videoUrl })
+            }
             disabled={!videoUrl}
           >
             下载当前集
@@ -707,7 +703,13 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
           <button
             type='button'
             className='shrink-0 rounded-full bg-gray-900/[0.05] px-3 py-1.5 text-xs text-gray-700 disabled:opacity-50 dark:bg-white/[0.06] dark:text-gray-200'
-            onClick={downloadCurrentEpisodeWithFfmpeg}
+            onClick={() =>
+              void enqueueDownload({
+                title: downloadTitle,
+                url: videoUrl,
+                channel: 'ffmpeg',
+              })
+            }
             disabled={!videoUrl}
           >
             FFmpeg 转存

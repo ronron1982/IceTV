@@ -17,6 +17,7 @@ import {
   readAutoPlayNextEnabled,
   readBlockAdEnabled,
   readEnableOptimization,
+  readPlaybackRate,
 } from '@/lib/local-preferences';
 import { SearchResult } from '@/lib/types';
 
@@ -43,6 +44,9 @@ export type VideoQualityInfo = {
   hasError?: boolean;
 };
 export type SourceRecommendation = {
+  source: string;
+  id: string;
+  title: string;
   sourceName: string;
   quality: string;
   loadSpeed: string;
@@ -145,7 +149,8 @@ export function usePlayPageState(searchParams: ReadonlyURLSearchParams) {
   const allowAutoResumeRef = useRef(true);
   const stableCurrentTimeRef = useRef(0);
   const lastVolumeRef = useRef<number>(0.7);
-  const lastPlaybackRateRef = useRef<number>(1.0);
+  const [initialPlaybackRate] = useState(readPlaybackRate);
+  const lastPlaybackRateRef = useRef<number>(initialPlaybackRate);
 
   useEffect(() => {
     allowAutoResumeRef.current = true;

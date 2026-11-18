@@ -1,6 +1,7 @@
 import './globals.css';
 
 import type { Metadata, Viewport } from 'next';
+import localFont from 'next/font/local';
 import { cookies } from 'next/headers';
 
 import { AuthProvider } from '@/components/AuthProvider';
@@ -18,15 +19,33 @@ import ToastViewport from '@/components/ToastViewport';
 import { TraditionalChineseProvider } from '@/components/TraditionalChineseProvider';
 import { DownloadManagerProvider } from '@/contexts/DownloadManagerContext';
 import { AdminAlertsProvider } from '@/features/admin/components/AdminAlertsProvider';
+import { ListPickerProvider } from '@/features/lists/components/ListPickerProvider';
 import { WatchRecordProvider } from '@/features/watch-record/WatchRecordProvider';
 import { getServerAuthSession } from '@/lib/auth-session.server';
 import { getConfigForRead, getPublicConfig } from '@/lib/config';
 import { canUserWatchLive } from '@/lib/live-access.server';
 import { serializeForInlineScript } from '@/lib/script-serialization';
 import { DEFAULT_SITE_FOOTER_TEXT } from '@/lib/site-footer';
+import { DEFAULT_APPLE_TOUCH_ICON } from '@/lib/site-icon';
 import { getStorageType } from '@/lib/storage-type';
 import { buildThemeInitScript, DEFAULT_THEME } from '@/lib/theme-preference';
 import { CURRENT_UPDATE_BRANCH } from '@/lib/version';
+
+// 不用 next/font/google：构建时联网下载，Google 偶发异常会让构建失败。年度报告的细字重也取自这里
+const inter = localFont({
+  src: './fonts/inter-latin-wght.woff2',
+  weight: '200 800',
+  display: 'swap',
+  fallback: [
+    'system-ui',
+    '-apple-system',
+    'PingFang SC',
+    'Microsoft YaHei',
+    'Hiragino Sans GB',
+    'Noto Sans SC',
+    'sans-serif',
+  ],
+});
 
 const storageType = getStorageType();
 const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'IceTV';
@@ -90,7 +109,6 @@ export default async function RootLayout({
     ENABLE_USER_DANMAKU: publicConfig.EnableUserDanmaku,
     CUSTOM_CATEGORIES: publicConfig.CustomCategories,
     FLUID_SEARCH: publicConfig.FluidSearch,
-    TRADITIONAL_CHINESE: publicConfig.TraditionalChinese,
     VOD_PAGE_TIMEOUT_SECONDS: publicConfig.VodPageTimeoutSeconds,
     VOD_FRAGMENT_TIMEOUT_SECONDS: publicConfig.VodFragmentTimeoutSeconds,
     PLAYBACK_HISTORY_PAGE_SIZE: publicConfig.PlaybackHistoryPageSize,
@@ -113,7 +131,7 @@ export default async function RootLayout({
         />
         <link
           rel='apple-touch-icon'
-          href={initialSiteIcon || '/icons/icon-192x192.png'}
+          href={initialSiteIcon || DEFAULT_APPLE_TOUCH_ICON}
         />
         <link rel='icon' href={initialSiteIcon || '/favicon.ico'} />
         <script
@@ -122,7 +140,9 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className='min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-200'>
+      <body
+        className={`${inter.className} min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-200`}
+      >
         <ThemeProvider disableTransitionOnChange>
           <RuntimeConfigProvider initialConfig={runtimeConfig}>
             <TraditionalChineseProvider>
@@ -137,7 +157,9 @@ export default async function RootLayout({
                     <AdminAlertsProvider>
                       <MessageCenterProvider>
                         <CardInteractionProvider>
-                          <WatchRecordProvider>{children}</WatchRecordProvider>
+                          <WatchRecordProvider>
+                            <ListPickerProvider>{children}</ListPickerProvider>
+                          </WatchRecordProvider>
                           <PageScrollRestorer />
                           <ClientErrorReporter />
                           <ToastViewport />

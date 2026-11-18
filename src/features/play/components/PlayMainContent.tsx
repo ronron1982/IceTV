@@ -1,4 +1,9 @@
-import { AlertTriangle, LockKeyhole, RefreshCw } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowLeftRight,
+  LockKeyhole,
+  RefreshCw,
+} from 'lucide-react';
 import { RefObject, useEffect, useRef, useState } from 'react';
 
 import { PlayerPageLayout } from '@/components/PlayerPageLayout';
@@ -16,6 +21,7 @@ import type { DanmakuReloadHandler } from '@/features/play/lib/danmaku/types';
 import {
   type VodStartupProgress,
   describeVodStartupState,
+  getVodStartupNow,
   getVodStartupProgress,
 } from '@/features/play/lib/playerLoading';
 import type { VodPlaybackIntent } from '@/features/play/lib/vodPlaybackIntent';
@@ -27,6 +33,7 @@ import { SearchResult } from '@/lib/types';
 
 interface PlayMainContentProps {
   videoTitle: string;
+  videoUrl?: string;
   totalEpisodes: number;
   detail: SearchResult | null;
   detailLoading: boolean;
@@ -44,6 +51,8 @@ interface PlayMainContentProps {
   onDismissAuthRecovery: () => void;
   onEpisodeChange: (episodeNumber: number) => void;
   onRetryPlayback: () => void;
+  onOpenSources: () => void;
+  openSourcesRequest: number;
   onSourceChange: (newSource: string, newId: string, newTitle: string) => void;
   currentSource: string;
   currentId: string;
@@ -70,7 +79,6 @@ interface PlayMainContentProps {
   onLoadingTimeout?: () => boolean | void;
   playbackError?: string | null;
   playbackIntentRef?: RefObject<VodPlaybackIntent>;
-  videoUrl?: string;
 }
 
 const SOURCE_RECOMMENDATION_AUTO_DISMISS_MS = 5000;
@@ -106,6 +114,19 @@ function RetryPlaybackButton({ onRetry }: { onRetry: () => void }) {
   );
 }
 
+function OpenSourcesButton({ onOpenSources }: { onOpenSources: () => void }) {
+  return (
+    <button
+      type='button'
+      onClick={onOpenSources}
+      className={PLAYER_OVERLAY_SECONDARY_BUTTON_CLASS}
+    >
+      <ArrowLeftRight className='h-3.5 w-3.5 sm:h-4 sm:w-4' />
+      <span>选择其他源</span>
+    </button>
+  );
+}
+
 function PlayLoadingOverlay({
   visible,
   loadingTimedOut,
@@ -114,6 +135,7 @@ function PlayLoadingOverlay({
   timeoutSeconds,
   totalLimit,
   onRetry,
+  onOpenSources,
 }: {
   visible: boolean;
   loadingTimedOut: boolean;
@@ -122,6 +144,7 @@ function PlayLoadingOverlay({
   timeoutSeconds: number;
   totalLimit: boolean;
   onRetry: () => void;
+  onOpenSources: () => void;
 }) {
   const stageConfig = LOADING_STAGE_CONFIG[videoLoadingStage];
 
@@ -135,6 +158,7 @@ function PlayLoadingOverlay({
         message={buildLoadingTimeoutMessage(timeoutSeconds, totalLimit)}
       >
         <RetryPlaybackButton onRetry={onRetry} />
+        <OpenSourcesButton onOpenSources={onOpenSources} />
       </PlayerStateOverlay>
     );
   }
@@ -160,18 +184,20 @@ function PlayLoadingOverlay({
 function PlaybackErrorOverlay({
   message,
   onRetry,
+  onOpenSources,
 }: {
   message: string;
   onRetry: () => void;
+  onOpenSources: () => void;
 }) {
   return (
     <PlayerStateOverlay
       zClassName='z-[510]'
       icon={<AlertTriangle />}
       title={message}
-      message='请从右侧面板手动切换其他源站。'
     >
       <RetryPlaybackButton onRetry={onRetry} />
+      <OpenSourcesButton onOpenSources={onOpenSources} />
     </PlayerStateOverlay>
   );
 }
@@ -214,6 +240,7 @@ function AuthRecoveryOverlay({
 export function PlayMainContent(props: PlayMainContentProps) {
   const {
     videoTitle,
+    videoUrl = '',
     totalEpisodes,
     detail,
     detailLoading,
@@ -230,6 +257,8 @@ export function PlayMainContent(props: PlayMainContentProps) {
     onDismissAuthRecovery,
     onEpisodeChange,
     onRetryPlayback,
+    onOpenSources,
+    openSourcesRequest,
     onSourceChange,
     currentSource,
     currentId,
@@ -253,7 +282,6 @@ export function PlayMainContent(props: PlayMainContentProps) {
     realtimeLoadSpeed,
     playbackError,
     playbackIntentRef,
-    videoUrl,
   } = props;
 
   const [loadingTimedOut, setLoadingTimedOut] = useState(false);
@@ -293,7 +321,7 @@ export function PlayMainContent(props: PlayMainContentProps) {
     setLoadingTimedOut(false);
     setTotalLimitReached(false);
     // 无运行时的准备阶段用一个无进展窗口兜底；已登记的源尝试同时受总预算约束。
-    const effectStartedAt = performance.now();
+    const effectStartedAt = getVodStartupNow();
     const fallbackProgress = {
       sourceKey: '',
       startedAt: effectStartedAt,
@@ -302,7 +330,7 @@ export function PlayMainContent(props: PlayMainContentProps) {
     let expiredProgress: ReturnType<typeof getVodStartupProgress> = null;
     const intent = playbackIntentRef?.current;
     const timer = setInterval(() => {
-      if (intent !== playbackIntentRef?.current) return;
+      if (intent !== playbackIntentRef?.current || document.hidden) return;
       const video = artRef.current?.querySelector('video');
       const runtimeProgress = video ? getVodStartupProgress(video) : null;
       const attempt = playbackIntentRef?.current.activeSource;
@@ -326,7 +354,7 @@ export function PlayMainContent(props: PlayMainContentProps) {
         (attempt?.allowAutoFallback && !attempt.routeSwitched
           ? attemptTimeouts.idleMs
           : 0);
-      const now = performance.now();
+      const now = getVodStartupNow();
       const totalLimit = now - startedAt >= totalBudget;
       if (!totalLimit && now - progress.lastProgressAt < attemptTimeouts.idleMs)
         return;
@@ -400,11 +428,13 @@ export function PlayMainContent(props: PlayMainContentProps) {
             }
             totalLimit={totalLimitReached}
             onRetry={onRetryPlayback}
+            onOpenSources={onOpenSources}
           />
           {playbackError && (
             <PlaybackErrorOverlay
               message={playbackError}
               onRetry={onRetryPlayback}
+              onOpenSources={onOpenSources}
             />
           )}
           {authRecoveryVisible && (
@@ -414,23 +444,37 @@ export function PlayMainContent(props: PlayMainContentProps) {
               onDismissAuthRecovery={onDismissAuthRecovery}
             />
           )}
+          {/* 起播慢时最需要换源，提示须浮在加载遮罩（z-500）之上才能点击 */}
           {sourceRecommendation && !playbackError && (
-            <div className='absolute right-3 top-3 z-20 max-w-[min(22rem,calc(100%-1.5rem))] animate-menu-in-down rounded-xl bg-black/80 px-3 py-2 text-xs text-white shadow-lg ring-1 ring-white/10 sm:right-4 sm:top-4'>
+            <div className='absolute right-3 top-3 z-[505] max-w-[min(22rem,calc(100%-1.5rem))] animate-menu-in-down rounded-xl bg-black/80 px-3 py-2 text-xs text-white shadow-lg ring-1 ring-white/10 sm:right-4 sm:top-4'>
               <div className='font-medium'>
                 发现更优源：{sourceRecommendation.sourceName}
               </div>
               <div className='mt-0.5 text-white/75'>
                 {sourceRecommendation.quality} ·{' '}
                 {sourceRecommendation.loadSpeed}
-                ，可在换源中手动选择
               </div>
-              <button
-                type='button'
-                className='mt-1 text-brand-300 hover:text-brand-200'
-                onClick={() => onDismissSourceRecommendationRef.current?.()}
-              >
-                知道了
-              </button>
+              <div className='mt-1.5 flex items-center gap-3'>
+                <button
+                  type='button'
+                  className='inline-flex items-center gap-1 font-medium text-brand-300 hover:text-brand-200'
+                  onClick={() => {
+                    const { source, id, title } = sourceRecommendation;
+                    onDismissSourceRecommendationRef.current?.();
+                    onSourceChange(source, id, title);
+                  }}
+                >
+                  <ArrowLeftRight className='h-3.5 w-3.5' />
+                  切换
+                </button>
+                <button
+                  type='button'
+                  className='text-white/60 hover:text-white/85'
+                  onClick={() => onDismissSourceRecommendationRef.current?.()}
+                >
+                  忽略
+                </button>
+              </div>
             </div>
           )}
         </>
@@ -461,6 +505,7 @@ export function PlayMainContent(props: PlayMainContentProps) {
           onAddSources={onAddSources}
           onDanmakuReload={onDanmakuReload}
           onDanmakuHeatmapChange={onDanmakuHeatmapChange}
+          openSourcesRequest={openSourcesRequest}
           videoUrl={videoUrl}
         />
       }
